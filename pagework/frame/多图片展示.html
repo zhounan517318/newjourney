@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>思考题</title>
+</head>
+<style>
+*{ padding:0; margin:0; list-style:none;}
+ul{ width:630px; height:630px; position:absolute; top:20px; left:50%; margin-left:-315px; padding:0 10px 10px 0; background:#eee;}
+li{ width:200px; height:200px; float:left; margin:10px 0 0 10px;}
+
+ul li.show{ width:300px; height:300px; position:absolute; top:-50px;left:-50px; z-index:2;}
+ul li a img{ width:100%; height:100%;}
+</style>
+<script src="onMove.js"></script>
+<script>
+	window.onload=function(){
+		var oUl=document.getElementById('ul1');
+		var aLi=oUl.getElementsByTagName('li');
+		
+	
+	//布局转化	
+		var aPos={};
+		//把所有li的top和left值保存在aPos的json里面
+		for(var i=0;i<aLi.length;i++){
+			aPos[i]={
+				left:aLi[i].offsetLeft,
+				top:aLi[i].offsetTop	
+			}		
+		}
+		//把所有的li变成定位元素，并把保存的值重新赋值给li
+		for(var i=0;i<aLi.length;i++){
+			aLi[i].style.position='absolute';
+			aLi[i].style.left=aPos[i].left+'px';
+			aLi[i].style.top=aPos[i].top+'px';
+			aLi[i].style.margin=0;	
+		}
+		
+			
+	    for(var i=0;i<aLi.length;i++){
+			aLi[i].index=i;
+			aLi[i].onmouseover=function(){
+				this.style.zIndex=2;
+				move(this,{width:300,height:300,left:aPos[this.index].left-50,top:aPos[this.index].top-50});
+			};	
+			aLi[i].onmouseout=function(){
+				this.style.zIndex=0;
+				move(this,{width:200,height:200,left:aPos[this.index].left,top:aPos[this.index].top});
+			};	
+		}	
+	};
+</script>
+<body>
+<ul id="ul1">
+  <li><a href="javascript:;"><img src="psu.jpg" width="400" height="400" /></a></li>
+  <li><a href="javascript:;"><img src="psu.jpg" width="400" height="400" /></a></li>
+  <li><a href="javascript:;"><img src="psu.jpg" width="400" height="400" /></a></li>
+  <li><a href="javascript:;"><img src="psu.jpg" width="400" height="400" /></a></li>
+  <li><a href="javascript:;"><img src="psu.jpg" width="400" height="400" /></a></li>
+  <li><a href="javascript:;"><img src="psu.jpg" width="400" height="400" /></a></li>
+  <li><a href="javascript:;"><img src="psu.jpg" width="400" height="400" /></a></li>
+  <li><a href="javascript:;"><img src="psu.jpg" width="400" height="400" /></a></li>
+  <li><a href="javascript:;"><img src="psu.jpg" width="400" height="400" /></a></li>
+</ul>
+</body>
+</html>

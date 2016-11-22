@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+<head>
+<style type="text/css">
+	*{margin: 0;padding: 0;list-style: none;}
+	ul{width: 500px;height: 500px;position: relative;margin: 20px auto;}
+	li{width:145px;height:196px;float: left;
+		border-radius:1px;border:1px solid #23232e;
+		margin:6px;text-align: center;line-height: 145px;
+		
+	}
+	li img{
+		width: 100%;
+		height: 100%;
+	}
+
+ li a{width:145px;
+	height:196px;display: inline-block;}
+li span{background:rgba(0, 0, 0, 0.5);
+				  border-bottom-left-radius: 2px;
+				  border-bottom-right-radius: 2px;line-height: 23px;
+				  position:absolute;bottom: 3px;
+				  color:#63c6ae;font-family: segoeuib, Arial, sans-serif;
+				  font-size: 12px;
+				  font-weight: normal;
+				  text-align:center;
+				  height: 30px;width:145px;
+				  line-height:30px;
+				  display:inline-block;
+				  left:0;
+				  
+}
+li:hover{
+	   box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.85);
+	}			
+
+.read_img1{background:url(../img/red1.jpg) no-repeat;
+           background-size: cover;}
+.read_img2{background:url(../img/red2.jpg) no-repeat;
+           background-size: cover;}
+.read_img3{background:url(../img/red5.jpg) no-repeat;
+           background-size: cover;}
+.read_img4{background:url(../img/red3.jpg) no-repeat;
+           background-size: cover;}
+.read_img5{background:url(../img/BOK4.jpg) no-repeat;
+           background-size: cover;}
+.read_img6{background:url(../img/red4.jpg) no-repeat;
+           background-size: cover;}	
+</style>
+<script type="text/javascript" src = "../js/onMove.js"></script>
+<script type="text/javascript">
+window.onload = function(){
+	
+	var zIndex = 100;
+	var arr = [0,1,2,3,4,5,6,7,8];
+	//转换布局
+	var aLi = document.getElementsByTagName('li');
+	var aPos = [] ;
+	for(var i=0;i<aLi.length;i++){
+		var l = aLi[i].offsetLeft;
+		var t = aLi[i].offsetTop;
+		aPos.push({'left':l,'top':t});
+	}
+	for(var i=0;i<aLi.length;i++){
+		aLi[i].style.left = aPos[i].left + "px"; 
+		aLi[i].style.top = aPos[i].top + "px"; 
+		aLi[i].style.position = 'absolute';
+		aLi[i].style.margin = 0;
+	}
+	for(var i = 0;i<aLi.length;i++){
+		drag(aLi[i]);
+		aLi[i].index = i;
+	}
+
+	//转换布局结束
+	
+
+	function collTest(obj1,obj2){
+		var l1 = obj1.offsetLeft;
+		var t1 = obj1.offsetTop;
+		var r1 = l1 + obj1.offsetWidth;
+		var b1 = t1 + obj1.offsetHeight;
+		
+		var l2 = obj2.offsetLeft;
+		var t2 = obj2.offsetTop;
+		var r2 = l2 + obj2.offsetWidth;
+		var b2 = t2 + obj2.offsetHeight;
+		
+		if(r1 < l2 || b1 < t2 || l1 > r2 || t1 > b2){
+			return false;	
+		} else {
+			return true;
+		}	
+	}
+
+	function findNearest(obj){
+		var iMin = 99999999;
+		var iMinIndex = -1;
+		//----------------------------
+		for(var i=0;i<aLi.length;i++){
+			if(obj == aLi[i]){
+				continue;
+			}else{
+				if(collTest(obj,aLi[i])){
+					
+					var a = obj.offsetLeft - aLi[i].offsetLeft;
+					var b = obj.offsetTop - aLi[i].offsetTop;
+					var c = Math.sqrt(Math.pow(a,2)+Math.pow(b,2));
+					if(iMin > c){
+						iMin = c;
+						iMinIndex = i;
+					}
+				}else{
+					aLi[i].style.background = "black";
+				}
+			}
+		}
+		//---------------------
+		if(iMinIndex != -1){
+			return aLi[iMinIndex];
+		}else{
+			return null;
+		}
+	}
+
+
+	function drag(obj){
+		obj.onmousedown = function(ev){
+			clearInterval(obj.timer);
+		    obj.style.zIndex = ++zIndex;
+			var oEvent = ev||event;
+			var disX = oEvent.clientX - obj.offsetLeft;
+			var disY = oEvent.clientY - obj.offsetTop;
+			document.onmousemove = function(ev){
+				var oEvent = ev||event;
+				obj.style.left = oEvent.clientX - disX + "px";
+				obj.style.top = oEvent.clientY - disY + 'px';
+				
+				if(findNearest(obj)){
+					for(var i=0;i<aLi.length;i++){
+						aLi[i].style.background = "black";
+					}
+					findNearest(obj).style.background = 'red';
+				}
+				document.onmouseup = function(){
+					document.onmousemove = null;
+					document.onmouseup = null;
+					obj.releaseCapture&&obj.releaseCapture();
+					var fuck = findNearest(obj);
+					if(fuck){
+						var fns = findNearest(obj).index;
+						var obi = obj.index;
+						//console.log(fns,obi);
+						move(obj,aPos[fns]);
+						move(fuck,aPos[obi]);
+						/*obj.style.left = aPos[fns].left + "px";
+						obj.style.top = aPos[fns].top + "px";
+						fuck.style.left = aPos[obi].left + "px";
+						fuck.style.top = aPos[obi].top + "px";*/
+						obj.index = fns;
+						fuck.index = obi;
+						for(var i=0;i<aLi.length;i++){
+							aLi[i].style.background = "black";
+						}
+				}else{
+					move(obj,aPos[obj.index]);
+				}
+			}
+			obj.getCapture&&obj.getCapture();
+			return false;
+			}
+		}
+	}
+}
+</script>
+</head>
+<body>
+	
+	<ul>
+		<li><a href="javascript:;" class="read_img1"></a><span>向着光亮那方</span></li>
+        <li><a href="javascript:;" class="read_img2"></a><span>生命不息，折腾不止</span></li>
+        <li><a href="javascript:;" class="read_img3"></a><span>岛上书店</span></li>
+        <li><a href="javascript:;" class="read_img4"></a><span>世界尽头与冷酷仙境</span></li>
+        <li><a href="javascript:;" class="read_img5"></a><span>追风筝的人</span></li>
+        <li><a href="javascript:;" class="read_img6"></a><span>白夜行</span></li>
+		
+	</ul>
+</body>
+</html>

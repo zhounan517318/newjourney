@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		body{
+			margin: 0;
+			padding: 0;
+			background: black;
+		}
+
+		ul,li{
+			list-style: none;
+			margin: 0;
+			padding:0;
+		}
+
+		.card{
+			width: 133px;
+			height: 200px;
+			position: absolute;
+			left: 0;
+			top: 0;
+			border-radius: 3px;
+			box-shadow: 0 0 14px white;
+		}
+
+		.container{
+			width: 50px;
+			height: 500px;
+			margin: 20px auto;
+			perspective: 1200px;
+			position: relative;
+			transform-style: preserve-3d;
+		}
+
+		.wrapper{
+			width: 133px;
+			height: 200px;
+			position: absolute;
+			top: 40%;
+			transform-style: preserve-3d;
+			transform: rotateX(-10deg);
+		}
+
+		.shadow{
+			width: 133px;
+			height: 200px;
+			transform: scale(1,-1);
+			position: absolute;
+			top: 220px;
+			left: 0;
+			opacity: 0.5;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<ul class="wrapper">
+		</ul>
+	</div>
+
+	<script>
+		var oContainer = document.querySelector('.container')
+		var oWrapper = document.querySelector('.wrapper')
+
+		var count = 10;
+
+		var translateX = 0;
+		var translateY = 25;
+
+		var oldX = 0;
+		var oldY = 0;
+
+		var speedX = 0;
+		var speedY = 0;
+
+		var timer;
+
+		for( var index = 0; index < count;index++ ){
+			<!--环绕布局-->
+			var oCard = document.createElement('li');
+				oCard.classList.add('card');
+           <!--每个图片环绕出现的时间和延迟时间-->
+				oCard.style.transition = `0.7s ${(count-index-1)*0.2}s`
+				oCard.style.backgroundImage = `url(../img/3${index}.jpg)`;
+<!--创建倒影-->
+			var oShadow = document.createElement('div');
+				oShadow.classList.add('shadow');
+ 
+				oShadow.style.backgroundImage = `linear-gradient(rgba(0,0,0,1) 50%,rgba(0,0,0,0)),url(../img/3${index}.jpg)`;
+
+			oCard.appendChild(oShadow);
+<!--每张图片旋转和位移-->
+			(function(index,oCard){
+				setTimeout(function(){
+					oCard.style.transform = `rotateY(${360/count*index}deg) translateZ(300px)`
+				})
+			})(index,oCard)
+
+			oWrapper.appendChild(oCard);
+		}
+
+		var aCards = document.querySelectorAll('li');
+<!--最后一张图完成监听事件-->
+		aCards[0].addEventListener('transitionend',function(){
+			
+			aCards.forEach(function(oCard){
+	<!--将图片进行透明渐变，后面减掉延迟时间，然图片同时渐变-->
+				oCard.style.transition = '0.7s';
+			})
+      <!--拖拽等操作图片位移和透明度的变化-->
+			setPosition();
+		},false)
+<!--拖拽-->
+		document.onmousedown = function(ev){
+	<!--清除默认样式-->		
+			ev.preventDefault();
+
+			clearInterval(timer);
+     <!--清除拖动后粘稠的效果-->
+			clearTransition();
+
+			var disX = ev.clientX - translateX;
+			var disY = ev.clientY - translateY;
+
+			document.onmousemove = function(ev){
+				var deltaX = ev.clientX - disX;
+				var deltaY = ev.clientY - disY;
+    <!--每一次拖拽的距离translateX、Y为移动后的减去鼠标按下的移动距离-->
+				translateX = deltaX;
+				translateY = deltaY;
+
+				setPosition();
+ <!--运动，将最后运动记录，获取运动均速-->
+				speedX = deltaX - oldX;
+				speedY = deltaY - oldY;
+
+				oldX = deltaX;
+				oldY = deltaY;
+			}
+
+			document.onmouseup = function(){
+				document.onmousemove = null;
+				document.onmouseup = null;
+
+				timer = setInterval(function(){
+<!--运动后缓冲系数，慢慢停止-->
+					speedX *= 0.9;
+					speedY *= 0.9;
+
+					translateX += speedX;
+					translateY += speedY;
+<!--停止后的位置和透明值-->
+					setPosition();
+<!--判断条件关闭定时器-->
+					if( Math.abs(speedX) < 0.0007 && Math.abs(speedY) < 0.0007 ){
+						clearInterval(timer)
+					}
+				},16)
+			}
+		}
+<!--将图片进行透明度渐变-->
+		function setPosition(){
+			aCards.forEach(function(oCard,index){
+				
+				<!--translateX为左右拖拽的位移，因为左右拖拽，translateX可能为负值，所有取绝对值-->
+				<!--各角度减180除以180，为了能将最前面的透明度变成|（0-180）/180|=1,而对称那边|（180-180）/180|=0不能看见-->
+				<!--+0.3位了使后面的透明度最低不小于0.3，不全黑-->
+				<!--Math.abs()%360为了无论转多少圈，透明度功能能实现-->
+				
+				oCard.style.opacity = Math.abs(Math.abs(360/count*index+translateX*0.4)%360-180)/180 + 0.3;
+				<!--选择位移和角度变化-->
+
+				oCard.style.transform = `rotateY(${360/count*index+translateX*0.4}deg) translateZ(300px)`
+			})
+    <!--父级按照拖拽进行旋转-->
+			oWrapper.style.transform = `rotateX(${-translateY*0.4}deg)`
+		}
+<!--清除鼠标离开后粘稠的效果-->
+		function clearTransition(){
+			aCards.forEach(function(oCard){
+				oCard.style.transition = '';
+			})
+		}
+	</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
