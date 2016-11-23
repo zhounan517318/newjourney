@@ -2,7 +2,7 @@ var aPage=document.getElementsByClassName('page');
 var aBtn=document.getElementsByClassName('btn');
 var aClose=document.getElementsByClassName('close');
 var aBig=document.getElementsByClassName('bigg');
-alert(aBig.length);
+
 for(var i=0;i<aBtn.length;i++){
 	(function(index){	
 		aBtn[i].onclick=function(){
